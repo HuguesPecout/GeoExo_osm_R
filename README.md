@@ -14,6 +14,8 @@ Vous pouvez ensuite lancer le projet Rstudio en double-cliquant sur le fichier *
 
 ### Présentation des données à utiliser
 
+Université du Sine Saloum El-Hâdj Ibrahima NIASS -> Geocodage
+
 Les fichier de données sont mis à disposition sont contenu dans le dossier **data**.
 Ce repertoire contient 5 couches d’information géographiques :
 
