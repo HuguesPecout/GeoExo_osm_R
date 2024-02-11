@@ -22,7 +22,6 @@ Une fois le dossier dézipper, lancez le projet Rstudio en double-cliquant sur l
 
 #### **B. Les données à disposition**
 
-
 Les fichier de données sont mis à disposition dans le répertoire **data**, qui contient un seul fichier de données.
 
 ![](img/data.png)
