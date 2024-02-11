@@ -1,4 +1,4 @@
-# Geomatique & OSM avec R - Exercice appliqué <img src="img/logo.png" align="right" width="140"/>
+# OpenStreetMap avec R - Exercice appliqué <img src="img/logo.png" align="right" width="140"/>
 
 ### Master Géomatique - Université du Sine Saloum El-Hâdj Ibrahima NIASS
 
