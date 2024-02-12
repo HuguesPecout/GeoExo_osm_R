@@ -31,326 +31,191 @@ routes <-st_read(dsn = "data/GeoSenegal.gpkg", layer = "Routes")
 
 
 
+
 ###################################################################################################
 # B. Séléction et intersection spatiale
 ###################################################################################################
 
 ## B.1 Séléctionnez (par attribut ou par localisation) uniquement les localités du Sénégal.
 
-# Solution 1 - par attribut
-loc_sen <- loc[loc$PAYS == "SN", ]
-# Solution 2 - par localisation
-loc_sen <- st_filter(x = loc, 
-                     y = sen,
-                     .predicate = st_intersects)
+
+##---------------------- Géocodage adresse ---------------------------##
+
+# Construction d'un data.frame avec nom et adresse
+Mosquee_Touba <- data.frame(name = "Grande Mosquée de Touba",
+                            addresse = "Grande Mosquée de Touba, Sénégal")
 
 
 
-## B.2 Calculez le nombre de services présent dans chaque localité. 
-#Assignez le résultat dans une nouvelle colonne de la couche géographique des localités sénégalaises.
-loc_sen$SERV_TT <- rowSums(loc_sen[,5:17,drop=TRUE])
-
-
-## B.3 Découpez le réseau routier en fonction des limites du Sénégal.
-routes_sen <- st_intersection(x = routes, y = sen)
+# Géocodage de l'adresse à partir de la base de données OpenStreetMap
+library(tidygeocoder)
+Mosquee_Touba_loc <- geocode(.tbl = Mosquee_Touba, address =  addresse)
 
 
 
-###################################################################################################
-# C. Carte thématique des localités
-###################################################################################################
 
-# Paramètrage de l'export
-mf_export(x = sen, filename = "img/carte_1.png", width = 800)
-# Initialisation d'un thème
-mf_theme(bg = "steelblue3", fg= "grey10")
-# Centrage de la carte sur le Sénégal
-mf_map(x = reg, col = NA, border = NA)
-# Ajout des limites des pays voisins
-mf_map(pays, add = TRUE)
-# Ajout d'un effet d'ombrage sur le Sénégal
-mf_shadow(sen, add = TRUE)
-mf_map(sen, col = "grey95", add=T)
-# Affichage du réseau routier
-mf_map(routes_sen, col = "grey50", lwd = 0.4, add = TRUE)
 
-# Affichage des localités 
-# Symbols proportionnels = Nombre total de services / couleur = type de localité
-mf_map(x = loc_sen, 
-       var = c("SERV_TT", "TYPELOCAL"),
-       type = "prop_typo",
-       pal = "Reds", 
-       rev = TRUE,
-       inches = 0.06,
-       leg_pos = NA)
+##----------------- Création d'un point (objet sf) ------------------##
 
-# Ajout d'une annotation (localisation de USSEIN)
-mf_annotation(x = USSEIN, txt = "USSEIN", halo = TRUE, bg = "grey85", cex = 1.1)
+library(sf)
 
-# Ajout de toponymes
-text(x = 261744.7, y = 1766915, labels = "Océan\nAtlantique", col="#FFFFFF99", cex = 0.65)
-text(x = 456008.1, y = 1490739, labels = "Gambie", col="#00000099", cex = 0.6)
-text(x = 496293.2, y = 1364960, labels = "Guinée-Bissau", col="#00000099", cex = 0.6)
-text(x = 748298.6, y = 1355112, labels = "Guinée", col="#00000099", cex = 0.6)
-text(x = 875867.9, y = 1541766, labels = "Mali", col="#00000099", cex = 0.6)
-text(x = 683394.9, y = 1818838, labels = "Mauritanie", col="#00000099", cex = 0.6)
+# Création objet sf
+Mosquee_Touba_sf <- st_as_sf(Mosquee_Touba_loc, coords = c("long", "lat"), crs = 4326)
 
-# Reconstruction de la légende
-# Legend sur le type de localités
-mf_legend(type = "typo", 
-          val = c("Chef-lieu de région", 	
-                  "Chef-lieu de département",
-                  "Chef-lieu d’arrondissement",
-                  "Chef-lieu de communauté rurale ",
-                  "Commune",
-                  "Village important",
-                  "Village",
-                  "Commune d’arrondissement",
-                  "Habitat isolé"), 
-          pal = mf_get_pal(n = 9, palette = c("Reds")),
-          title_cex = 0.7,
-          val_cex = 0.5,
-          size = 0.6,
-          frame = TRUE,
-          bg = "#FFFFFF99",
-          title = "Statut des localités")
+# Transformation de la projection en Pseudo-Mercator (3857)
+Mosquee_Touba_sf <- st_transform(Mosquee_Touba_sf, crs = "EPSG:32628")
 
-# Légende sur le nombre de services
-mf_legend(type = "prop", 
-          val = c(1,3,5,7,10), 
-          inches = 0.06,
-          title_cex = 0.7,
-          title = "Nombre de\nservices",
-          horiz = TRUE,
-          frame = TRUE,
-          bg = "#FFFFFF99",
-          pos = "right")
 
-# Titre
-mf_title("Répartition des localités sénégalaises en 2024", fg = "white")
-# Sources
-mf_credits("Auteurs : Hugues Pecout\nSources : GADM & GeoSénégal, 2014", cex = 0.5)
 
-# Enregistrement du fichier png
+
+
+##----------- Visualisation du point - carte interactive ------------##
+
+library(mapview)
+mapview(Mosquee_Touba_sf)
+
+
+
+
+
+
+dep_pt <- st_centroid(dep)
+
+
+
+
+
+##-------------- Extraction de tuile OpenStreetMap -----------------##
+
+library(maptiles)
+osm_tiles <- get_tiles(x = st_buffer(sen, dist = 30000), zoom = 8, crop = TRUE)
+
+
+
+
+##-------------------- Affichage des données -----------------------##
+library(mapsf)
+plot_tiles(osm_tiles)
+mf_map(dep_pt, border = NA, col="blue" , cex = 2, pch = 20, add = TRUE)
+mf_map(dep, border = "black", col=NA , add = TRUE)
+mf_map(Mosquee_Touba_sf, border = NA, col="red" , cex = 3, pch = 20, add = TRUE)
+mtext(side = 1, line = -1, text = get_credit("OpenStreetMap"), col="tomato")
+
+mf_export(x = sen, filename = "img/carte_osm.png", width = 800)
+library(mapsf)
+plot_tiles(osm_tiles)
+mf_map(dep_pt, border = NA, col="blue" , cex = 2, pch = 20, add = TRUE)
+mf_map(dep, border = "black", col=NA , add = TRUE)
+mf_map(Mosquee_Touba_sf, border = NA, col="red" , cex = 3, pch = 20, add = TRUE)
+mtext(side = 1, line = -1, text = get_credit("OpenStreetMap"), col="tomato")
 dev.off()
 
 
 
+#####------------ Calcul de matrice de distance -----------------#####
 
-###################################################################################################
-# D. Nombre d'écoles dans un rayon de 50km ?
-###################################################################################################
+#------------------- Distance Euclidienne ---------------------------#
 
-## D.1. Calculez un buffer de 50 km autour d'USSEIN
-# Vérification de l'unité de la projection
-st_crs(USSEIN)
+mat_eucli_km <- st_distance(x = Mosquee_Touba_sf, y = dep_pt) 
 
-# Calcul d'un buffer de 5 kilomètres
-buf_5km <- st_buffer(USSEIN, 50000)
+# Changement nom de ligne et de colonne
+rownames(mat_eucli_km) <- Mosquee_Touba_sf$name
+colnames(mat_eucli_km) <- dep_pt$NAME_2
 
 
-## D.2. Séléctionnez les localités situées dans la zone tampon de 50km
-# Intersection entre les localités et le buffer
-inters_loc_buff <- st_intersection(loc, buf_5km)
+
+#---------------- Distance et temps par la route  -------------------#
+
+library(osrm)
+dist <- osrmTable(src = Mosquee_Touba_sf, 
+                  dst = dep_pt,
+                  measure = c("distance", "duration"))
 
 
-## D.3 Combien de ces localités abrite au moins une école ?
-# Nombre de localité dans un rayon de 50km ?
-nb_loc_ecole_50km_USSEIN <- sum(inters_loc_buff$SERV_ECOLE)
 
-# Affichage du résultat dans la console
-cat(paste0("Le nombre de localités abritant (au moins) une école dans un rayon de 50 km autour de l'",
-           USSEIN$NAME, " est de ", nb_loc_ecole_50km_USSEIN))
+#------ Ajout des valeurs (+ conversion) comme attributs des agglomérations ---------#
 
+# mètres -> kilomètres
+dep_pt$IRSP_eucli_dist <- as.numeric(mat_eucli_km) / 1000
 
-###################################################################################################
-# E. Utilisation d’un maillage régulier
-###################################################################################################
+# mètres -> kilomètres
+dep_pt$IRSP_route_km <- as.numeric(dist$distances) / 1000
 
-## E.1 Créez un maillage régulier de carreaux de 50km de côté sur l'ensemble du Sénégal
-grid <- st_make_grid(sen, cellsize = 15000, square = TRUE)
-# Transformer la grille en objet sf avec st_sf()
-grid <- st_sf(geometry = grid)
-# Ajouter un identifiant unique, voir chapitre 3.7.6
-grid$id_grid <- 1:nrow(grid)
-
-
-## E.2 Récuperez le carreau d'appartenance (id) de chaque localité.
-grid_loc<- st_intersects(grid, loc, sparse = TRUE)
-
-
-## E.3 Comptez le nombre de localités dans chacun des carreaux.
-grid$n_loc <- sapply(grid_loc, FUN = length)
-
-
-# E.4 Découpez la grille en fonction des limites du sénégal (optionel)
-grid_sen <- st_intersection(grid, sen)
+# Minutes -> heures
+dep_pt$IRSP_route_hr <- as.numeric(dist$durations) / 60
 
 
 
 
-###################################################################################################
-# F. Enregistrez la grille régulière dans le fichier GeoSenegal.gpkg
-###################################################################################################
+#####---------------------- Calcul d'indice ----------------------#####
 
-st_write(obj = grid_sen, dsn = "data/GeoSenegal.gpkg", layer = "grid_sen")
+#------------------ Calcul indice d'accessibilité  -------------------#
+
+mean(dep_pt$IRSP_eucli_dist)
+max(dep_pt$IRSP_eucli_dist)
+
+mean(dep_pt$IRSP_route_km)
+max(dep_pt$IRSP_route_km)
+
+mean(dep_pt$IRSP_route_hr)
+max(dep_pt$IRSP_route_hr)
 
 
 
+#------------------ Calcul indice de performance ---------------------#
 
-###################################################################################################
-# G. Construisez une carte représentant le nombre de localité par carreau.
-###################################################################################################
+# Indice de sinuosité 
+dep_pt$ind_sinuo <- round(dep_pt$IRSP_route_km / dep_pt$IRSP_eucli_dist, 2)
+
+# Indice de vitesse sur route
+dep_pt$ind_speed <- round(dep_pt$IRSP_route_km / dep_pt$IRSP_route_hr, 1)
+
+# Indice global de performance
+dep_pt$ind_perf <- round(dep_pt$ind_speed / dep_pt$ind_sinuo, 1)
 
 
-# Justification de la discrétisation (statistiques, boxplot, histogramme, beeswarm...) ?
-hist(grid_sen$n_loc)
 
-## CARTE
-# Paramètrage de l'export
-mf_export(x = sen, filename = "img/carte_2.png", width = 800)
-# Initialisation d'un thème
-mf_theme(bg = "steelblue3", fg= "grey10")
-# Centrage de la carte sur le Sénégal
-mf_map(x = reg, col = NA, border = NA)
-# Ajout des limites des pays voisin
-mf_map(pays, add = TRUE)
-# Ajout d'un effet d'ombrage sur le Sénégal
-mf_shadow(sen, add = TRUE)
-mf_map(sen, col = "grey95", add=T)
+#---------- Cartographie de l'indice global de performance----------#
 
-# carte choroplèthe - Nombre de localité par carreaux
-mf_map(x = grid_sen, 
-       var = "n_loc", 
+library(mapsf)
+
+plot_tiles(osm_tiles)
+mf_map(x = dep_pt,
+       var = "ind_perf",
        type = "choro",
-       add = T, 
-       border = NA,
-       leg_pos = "topright",
-       leg_title = "Nombre de\nlocalités",
+       pal = "Dark Mint",
+       leg_pos = "bottomleft2",
+       leg_title = "Indice de performance globale",
+       breaks = "jenks",
+       nbreaks = 8,
        leg_val_rnd = 0,
-       breaks = c(0,0.1,1,2,3,4,5, max(grid_sen$n_loc)), 
-       pal = "SunsetDark")
+       border=NA,
+       cex = 2,
+       add = TRUE)
 
-# Affichae du réseau routier
-mf_map(routes_sen, lwd = .3, col ="#b5b3b5", add=T )
-# Affichage des localités
-mf_map(loc_sen, add=T, col = "white", pch = ".", cex = .1)
-# Affichage des limite de région
-mf_map(reg, col = NA, border = "white", add = T)
-
-# Ajout d'une annotation (localisation de USSEIN)
-mf_annotation(x = USSEIN, txt = "USSEIN", halo = TRUE, bg = "grey85", cex = 1.1)
-
-# Ajout de toponymes
-text(x = 261744.7, y = 1766915, labels = "Océan\nAtlantique", col="#FFFFFF99", cex = 0.65)
-text(x = 456008.1, y = 1490739, labels = "Gambie", col="#00000099", cex = 0.6)
-text(x = 496293.2, y = 1364960, labels = "Guinée-Bissau", col="#00000099", cex = 0.6)
-text(x = 748298.6, y = 1355112, labels = "Guinée", col="#00000099", cex = 0.6)
-text(x = 875867.9, y = 1541766, labels = "Mali", col="#00000099", cex = 0.6)
-text(x = 683394.9, y = 1818838, labels = "Mauritanie", col="#00000099", cex = 0.6)
-
-# Titre
-mf_title("Nombre de localités sénégalaises dans un carroaye de 15km", fg = "white")
-# Sources
-mf_credits("Auteurs : Hugues Pecout\nSources : GADM & GeoSénégal, 2014", cex = 0.5)
-
-# Enregistrement du fichier png
-dev.off()
+plot(st_geometry(Mosquee_Touba_sf), border = "red", col="red" , lwd = 10, pch = 20, add = TRUE)
+mtext(side = 1, line = -1, text = get_credit("OpenStreetMap"), col="tomato")
 
 
 
 
-
-#---------------------------------------------------------------------------------------
-
-# BONUS
-
-library(potential)
-
-# create_grid() is used to create a regular grid with the extent of an existing layer (x) and a specific resolution (res).
-y <- create_grid(x = sen, res = 10000)
-
-# create_matrix() is used to compute distances between objects.
-d <- create_matrix(x = loc_sen, y = y)
+#--- Agglomération avec le plus haut indice global de performance ----#
 
 
-# The potential() function computes potentials.
-y$pot <- potential(x = loc_sen, y = y, d = d,
-                   var = "SERV_POSTE", fun = "e",
-                   span = 20000, beta = 2)
-
-# It’s possible to express the potential relatively to its maximum in order to display more understandable values (Rich 1980).
-y$pot2 <- 100 * y$pot / max(y$pot)
+# Sélection de l'agglomération présentant l'indice global le plus élevé
+city_max_perf <- dep_pt[dep_pt$ind_perf == max(dep_pt$ind_perf),]
 
 
 
 
-# It’s also possible to compute areas of equipotential with equipotential().
-bks <- mf_get_breaks(y$pot, breaks = "q6")
-iso <- equipotential(x = y, var = "pot", breaks = bks, mask = sen)
+#---------- Calcul d'itinéraire entre IRSP et city_max_perf ----------#
 
+route <- osrmRoute(src = Mosquee_Touba_sf, dst = city_max_perf)
 
-
-
-mf_theme(bg = "steelblue3", fg= "grey10")
-
-mf_map(x = reg, col = NA, border = NA)
-mf_map(pays, add = TRUE)
-
-mf_shadow(reg, add = TRUE)
-mf_map(reg, col = "grey95", add=T)
-
-
-mf_map(x = iso, var = "min", type = "choro", 
-       breaks = bks, 
-       pal = hcl.colors(10, 'Teal'),
-       lwd = .2,
-       border = "#121725", 
-       leg_pos = "topright",
-       leg_val_rnd = 0,
-       leg_title = "Potential of\nservices", add = TRUE)
-
-mf_map(routes_sen, lwd = .3, col ="#b5b3b5", add=T )
-mf_map(loc_sen, add=T, col = "white", pch = ".", cex = .1)
-mf_map(reg, col = NA, border = "white", add = T)
-
-
-mf_annotation(x = USSEIN, 
-              txt = "USSEIN", 
-              halo = TRUE, 
-              bg = "grey85",
-              cex = 1.1)
-
-text(x = 261744.7, 
-     y = 1766915, 
-     labels = "Océan\nAtlantique", 
-     col="#FFFFFF99", cex = 0.65)
-
-text(x = 456008.1, 
-     y = 1490739, 
-     labels = "Gambie", 
-     col="#00000099", cex = 0.6)
-
-text(x = 496293.2, 
-     y = 1364960, 
-     labels = "Guinée-Bissau", 
-     col="#00000099", cex = 0.6)
-
-text(x = 748298.6, 
-     y = 1355112, 
-     labels = "Guinée", 
-     col="#00000099", cex = 0.6)
-
-text(x = 875867.9, 
-     y = 1541766, 
-     labels = "Mali", 
-     col="#00000099", cex = 0.6)
-
-text(x = 683394.9, 
-     y = 1818838, 
-     labels = "Mauritanie", 
-     col="#00000099", cex = 0.6)
-
-mf_title("Potentiel d'accès à des services", fg = "white")
-mf_credits("Auteurs : Hugues Pecout\nSources : GADM & GeoSénégal, 2014", cex = 0.5)
-
+# Affichage de l'itinéraire
+plot_tiles(osm_tiles)
+plot(st_geometry(route), col = "grey10", lwd = 6, add = TRUE)
+plot(st_geometry(route), col = "grey90", lwd = 1, add = TRUE)
+plot(st_geometry(Mosquee_Touba_sf), border = NA, col="red", pch = 20, cex = 3, add = TRUE)
+plot(st_geometry(city_max_perf), border = NA, col="red", pch = 20, cex = 3, add = TRUE)
+mtext(side = 1, line = -1, text = get_credit("OpenStreetMap"), col="tomato")
