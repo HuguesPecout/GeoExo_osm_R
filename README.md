@@ -200,12 +200,65 @@ Calculez la médianne et la moyenne pour les trois type de distance récupérée
 
 </br>
 
-##### G.1 Calcul d'indicateurs de performance routière
+##### G.2 Calcul d'indicateurs de performance routière
+
+Calculez les indices de performance suivants :
+
+- **Indice de vitesse sur route** = distance km par la route / distance temps par la route
+- **Indice de sinuosité** = distance km par la route / distance euclidienne
+- **Indice global de performance** = **Indice de vitesse sur route** / **Indice de sinuosité**.
+
+Arrondissez les valeurs calculée avec la fonction `round()`
+
+    # Indice de sinuosité 
+    dep_pt$... <- round(...$... / ...$..., 2)
+    
+    # Indice de vitesse sur route
+    dep_pt$... <- round(...$... / ...$..., 1)
+    
+    # Indice global de performance
+    dep_pt$... <- round(...$... / ...$..., 1)
+
+</br>
+
+##### G.3 Cartographie de l'indice global de performance 
+
+Cartographiez la valeur de l'indice de performance pour chaque centroïde des départements.
+Utilisez la tuile OMS exportée comme fond de carte et affichez également le point de localisation de la grande Mosquée de Touba.
+
+    plot_tiles()
+    mf_map(x = dep_pt, var = "...", type = "...", add = TRUE)
+    mf_map(mosquee_touba_pt, add = TRUE)
+    
+    
+![](img/carte_indice_perf.png)
+
+</br>
+
+##### G.4 Indice global de performance
+
+Quel département présente l'indice global de performance le plus elevé
+
+    ... <- dep_pt[...$... == max(...$...),]
+
+    
+</br>
+
+
+#### H. Calul d'itinéraire
+
+
+##### H.1 Calcul ititnéraire "Mosquee Touba - Dakar"
+
+En utilisant la fonction `osrmRoute()` du package `osrm`, calculez 
+
+
+</br>
+
+##### H.2 Cartographie de l'itinéraire récupéré
 
 
 
+</br>
 
-
-
- 
 

@@ -179,13 +179,15 @@ dep_pt$ind_perf <- round(dep_pt$ind_speed / dep_pt$ind_sinuo, 1)
 
 library(mapsf)
 
+# mf_export(x = st_buffer(sen, dist = 30000), filename = "img/carte_indice_perf.png", width = 800)
+
 plot_tiles(osm_tiles)
 mf_map(x = dep_pt,
        var = "ind_perf",
        type = "choro",
        pal = "Dark Mint",
-       leg_pos = "bottomleft2",
-       leg_title = "Indice de performance globale",
+       leg_pos = "topright2",
+       leg_title = "Indice de\nperformance\nglobale",
        breaks = "jenks",
        nbreaks = 8,
        leg_val_rnd = 0,
@@ -193,8 +195,10 @@ mf_map(x = dep_pt,
        cex = 2,
        add = TRUE)
 
-plot(st_geometry(Mosquee_Touba_sf), border = "red", col="red" , lwd = 10, pch = 20, add = TRUE)
+mf_map(Mosquee_Touba_sf, border = "red", col="red" , lwd = 10, pch = 20, add = TRUE)
 mtext(side = 1, line = -1, text = get_credit("OpenStreetMap"), col="tomato")
+
+# dev.off()
 
 
 
