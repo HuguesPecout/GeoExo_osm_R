@@ -127,14 +127,14 @@ Utilisez un buffer de plusieurs kilomètre autour des limites du sénégal pour 
 
 Affichez les couches géographiques suivantes dans la fenêtre graphique :
 
-- La tuile OSM 
+- La tuile OSM, avec la fonction `mf_raster()` du package `mapsf`
 - Les limites des départements
 - Les centroïdes des départements
 - Le point géocodé
 
 ![](img/carte_osm.png)
     
-    plot_tiles(...)     
+    mf_raster(...)    
     mf_map(... , add = TRUE)    
     mf_map(... , add = TRUE)    
     mf_map(... , add = TRUE)    
@@ -172,7 +172,7 @@ En utilisant la fonction `osrmTable` du package `osrm`, calculez une matrice de 
 
 </br> 
                               
- ##### F.3 Ajouter les différentes distances calculées à la couche géographiques des centroïdes des départements
+##### F.3 Ajouter les différentes distances calculées à la couche géographiques des centroïdes des départements
  
  Profitez-en pour convertir convertir les unités de mesur en kilomètre et en heure.
  
@@ -189,11 +189,11 @@ En utilisant la fonction `osrmTable` du package `osrm`, calculez une matrice de 
  
 </br>
 
-#### G. Calculez d'indicateurs 
+#### G. Calcul d'indicateurs 
 
 ##### G.1 Calcul d'indicateurs globaux d'accessibilité
 
-Calculez la médianne et la moyenne pour les trois type de distance récupérée (euclidienne, par la route, temps par la route).
+Calculez la médianne et la moyenne pour les trois types de distance récupérés (euclidienne, par la route, temps par la route).
 
     mean(...$...)
     max(...$...)
@@ -223,10 +223,10 @@ Arrondissez les valeurs calculée avec la fonction `round()`
 
 ##### G.3 Cartographie de l'indice global de performance 
 
-Cartographiez la valeur de l'indice de performance pour chaque centroïde des départements.
+Cartographiez la valeur de l'indice de performance pour chaque centroïde de département.
 Utilisez la tuile OMS exportée comme fond de carte et affichez également le point de localisation de la grande Mosquée de Touba.
 
-    plot_tiles()
+    mf_raster(...)
     mf_map(x = dep_pt, var = "...", type = "...", add = TRUE)
     mf_map(mosquee_touba_pt, add = TRUE)
     
@@ -235,9 +235,10 @@ Utilisez la tuile OMS exportée comme fond de carte et affichez également le po
 
 </br>
 
-##### G.4 Indice global de performance
 
-Quel département présente l'indice global de performance le plus elevé
+##### G.4 Itinéraire le plus performant ?
+
+Quel centroïde département présente l'indice global de performance le plus elevé ?
 
     ... <- dep_pt[...$... == max(...$...),]
 
@@ -245,20 +246,38 @@ Quel département présente l'indice global de performance le plus elevé
 </br>
 
 
-#### H. Calul d'itinéraire
+#### H. Récupération d'itinéraire
 
 
-##### H.1 Calcul ititnéraire "Mosquee Touba - Dakar"
+##### H.1 Récupération de l'ititnéraire "Mosquee Touba - Dakar"
 
-En utilisant la fonction `osrmRoute()` du package `osrm`, calculez 
+En utilisant la fonction `osrmRoute()` du package `osrm`, calculez l'itinéraire routier entre la grande Mosquee de Touba et le centroîde de département présentant le meilleur indice global de performance. Stocker cet itinéraire (ligne) dans un nouvel objet.
+
+    ... <- osrmRoute(src = ..., dst = ...)
 
 
 </br>
 
 ##### H.2 Cartographie de l'itinéraire récupéré
 
+Cartographiez l'itinéraire présenant le meilleur indice de performance ("Mosquee Touba - Dakar") sur une carte.
+
+
+    mf_raster(...)
+    
+    mf_map(..., col = "grey10", lwd = 6, add = TRUE)
+    mf_map(..., col = "grey90", lwd = 1, add = TRUE)
+    
+    mf_map(..., border = NA, col="red", pch = 20, cex = 3, add = TRUE)
+    mf_map(...,  border = NA, col="red", pch = 20, cex = 3, add = TRUE)
+    
+
+    
+![](img/perf_itineraire.png)
 
 
 </br>
+</br>
+
 
 
