@@ -95,7 +95,7 @@ osm_tiles <- get_tiles(x = st_buffer(sen, dist = 30000), zoom = 8, crop = TRUE)
 
 ##-------------------- Affichage des données -----------------------##
 library(mapsf)
-plot_tiles(osm_tiles)
+mf_raster(osm_tiles)
 mf_map(dep_pt, border = NA, col="blue" , cex = 2, pch = 20, add = TRUE)
 mf_map(dep, border = "black", col=NA , add = TRUE)
 mf_map(Mosquee_Touba_sf, border = NA, col="red" , cex = 3, pch = 20, add = TRUE)
