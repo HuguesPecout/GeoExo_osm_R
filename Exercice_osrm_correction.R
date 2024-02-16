@@ -14,12 +14,14 @@
 # install.packages("mapview")
 # install.packages("maptiles")
 # install.packages("osrm")
+# install.packages("tidygeocoder")
 
 library(sf)
 library(mapsf)
 library(mapview)
 library(maptiles)
 library(osrm)
+library(tidygeocoder)
 
 
 
