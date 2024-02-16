@@ -20,14 +20,19 @@ library(osrm)
 # A. Import des données
 ###################################################################################################
 
+# Lister les couches géographiques d'un fichier GeoPackage
 
+## A.1 Import des données géographiques
+
+
+## A.2 Reprojection des couches géographiques 
 
 
 
 
 
 ###################################################################################################
-# B. Géocadage d’une adresse (point de départ)
+# B. Géocadage d’une adresse 
 ###################################################################################################
 
 ## B.1 Récupération de coordonnées géographiques
@@ -55,7 +60,7 @@ library(osrm)
 
 
 ###################################################################################################
-# C. Calcul de centroïdes (point de d’arrivée)
+# C. Calcul de centroïdes 
 ###################################################################################################
 
 # Créez une couche de point en calculant les centroïdes de départements sénégalais.
@@ -70,7 +75,7 @@ library(osrm)
 ###################################################################################################
 
 # En utilisant la librarie maptiles, récupérez une tuile OSM pour l’emprise du Sénégal. 
-# Utilisez un buffer de plusieurs kilomètre autour des limites du sénégal 
+# Utilisez un buffer de plusieurs kilomètres autour des limites du sénégal 
 
 
 
@@ -88,7 +93,7 @@ library(osrm)
 
 
 ###################################################################################################
-# F. Calculez des matrices de distances
+# F. Calculez une matrice de distances
 ###################################################################################################
 
 ## F.1 Distance euclidienne
@@ -100,7 +105,7 @@ library(osrm)
 
 
 
-## F.3 Ajouter les différentes distances calculées à la couche géographiques des centroïdes des départements
+## F.3 Ajoutez les différentes distances calculées à la couche géographiques des centroïdes des départements
 
 
 

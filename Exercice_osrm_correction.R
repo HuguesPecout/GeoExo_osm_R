@@ -9,10 +9,18 @@
 # Chargement des librairies
 ###################################################################################################
 
+# install.packages("sf")
+# install.packages("mapsf")
+# install.packages("mapview")
+# install.packages("maptiles")
+# install.packages("osrm")
+
 library(sf)
 library(mapsf)
 library(mapview)
+library(maptiles)
 library(osrm)
+
 
 
 
@@ -23,7 +31,7 @@ library(osrm)
 # Lister les couches géographiques d'un fichier GeoPackage
 st_layers("data/GeoSenegal.gpkg")
 
-# Import des données géographiques
+## A.1 Import des données géographiques
 pays <- st_read(dsn = "data/GeoSenegal.gpkg", layer = "Pays_voisins")
 sen <-st_read(dsn = "data/GeoSenegal.gpkg", layer = "Senegal")
 reg <-st_read(dsn = "data/GeoSenegal.gpkg", layer = "Regions")
@@ -33,10 +41,18 @@ USSEIN <-st_read(dsn = "data/GeoSenegal.gpkg", layer = "USSEIN")
 routes <-st_read(dsn = "data/GeoSenegal.gpkg", layer = "Routes")
 
 
+## A.2 Reprojection des couches géographiques 
+pays <- st_transform(pays,  "EPSG:3857")
+sen <- st_transform(sen,  "EPSG:3857")
+reg <- st_transform(reg,  "EPSG:3857")
+dep <- st_transform(dep,  "EPSG:3857")
+loc <- st_transform(loc,  "EPSG:3857")
+USSEIN <- st_transform(USSEIN,  "EPSG:3857")
+routes <- st_transform(routes,  "EPSG:3857")
 
 
 ###################################################################################################
-# B. Géocadage d’une adresse (point de départ)
+# B. Géocadage d’une adresse 
 ###################################################################################################
 
 ## B.1 Récupération de coordonnées géographiques
@@ -55,7 +71,7 @@ Mosquee_Touba_sf <- st_as_sf(Mosquee_Touba_loc, coords = c("long", "lat"), crs =
 
 
 ## B.3 Transformez cette nouvelle couche géographique en projection WGS 84 / UTM zone 28N (32628)
-Mosquee_Touba_sf <- st_transform(Mosquee_Touba_sf, crs = "EPSG:32628")
+Mosquee_Touba_sf <- st_transform(Mosquee_Touba_sf, crs = "EPSG:3857")
 
 
 ## B.4 Affichez le point sur une carte interactive avec le package mapview
@@ -78,9 +94,10 @@ dep_pt <- st_centroid(dep)
 # D. Récupération de tuiles (fond de carte) OpenStreetMap
 ###################################################################################################
 
+
 # En utilisant la librarie maptiles, récupérez une tuile OSM pour l’emprise du Sénégal. 
-# Utilisez un buffer de plusieurs kilomètre autour des limites du sénégal 
-osm_tiles <- get_tiles(x = st_buffer(sen, dist = 30000), zoom = 8, crop = TRUE)
+# Utilisez un buffer de plusieurs kilomètres autour des limites du sénégal 
+osm_tiles <- get_tiles(x = st_buffer(sen, dist = 30000), zoom = 7, crop = TRUE)
 
 
 
@@ -109,9 +126,8 @@ mf_credits(get_credit("OpenStreetMap"), cex = 1)
 
 
 
-
 ###################################################################################################
-# F. Calculez des matrices de distances
+# F. Calculez une matrice de distances
 ###################################################################################################
 
 ## F.1 Distance euclidienne
@@ -132,7 +148,7 @@ dist <- osrmTable(src = Mosquee_Touba_sf,
 
 
 
-## F.3 Ajouter les différentes distances calculées à la couche géographiques des centroïdes des départements
+## F.3 Ajoutez les différentes distances calculées à la couche géographiques des centroïdes des départements
 # mètres -> kilomètres
 dep_pt$IRSP_eucli_dist <- as.numeric(mat_eucli_km) / 1000
 # mètres -> kilomètres
@@ -148,7 +164,7 @@ dep_pt$IRSP_route_hr <- as.numeric(dist$durations) / 60
 
 ## G.1 Calcul d’indicateurs globaux d’accessibilité
 
-# Calculez la médianne et la moyenne pour les trois types de distance récupérés
+# Calculez la médianne et la moyenne pour les trois types de distances récupérés
 mean(dep_pt$IRSP_eucli_dist)
 max(dep_pt$IRSP_eucli_dist)
 

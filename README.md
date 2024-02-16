@@ -2,7 +2,7 @@
 
 ### Master Géomatique - Université du Sine Saloum El-Hâdj Ibrahima NIASS
 
-*Hugues Pecout*
+*Hugues Pecout (CNRS, UMR Géographie-Cités)*
 
 </br>
 
@@ -10,19 +10,19 @@
 
 Un projet Rstudio est téléchargeable à ce lien : [**https://github.com/HuguesPecout/GeoExo_osm_R**](https://github.com/HuguesPecout/GeoExo_osm_R)
 
-Téléchargez le dépot zipper ("*Download ZIP*") **GeoExo_osm_R** sur votre machine.   
+Téléchargez le dépot zippé ("*Download ZIP*") **GeoExo_osm_R** sur votre machine.   
 
 </br>
 
 ![](img/download.png)
 
-Une fois le dossier dézipper, lancez le projet Rstudio en double-cliquant sur le fichier **GeoExo_sosm_R.Rproj**.
+Une fois le dossier dézippé, lancez le projet Rstudio en double-cliquant sur le fichier **GeoExo_sosm_R.Rproj**.
 
 </br>
 
 #### **B. Les données à disposition**
 
-Les fichier de données sont mis à disposition dans le répertoire **data**, qui contient un seul fichier de données.
+Le fichier de données est mis à disposition dans le répertoire **data**.
 
 ![](img/data.png)
 
@@ -32,8 +32,8 @@ Les fichier de données sont mis à disposition dans le répertoire **data**, qu
 - **Pays_voisins** : Couche des frontières du Sénégal et de l'ensemble de ses pays limitrophes. Source : https://gadm.org/, 2014   
 - **Senegal** : Couche des frontières du Sénégal. Source : https://gadm.org/, 2014   
 - **Regions** : Couche des régions sénégalaises. Source : https://gadm.org/, 2014   
-- **Departements** : Couche des Departements sénégalais. Source : https://gadm.org/, 2014   
-- **Localites** : Couche de points des localités sénagalaises. Source : Base de données géospatiales prioritaires du Sénégal. https://www.geosenegal.gouv.sn/, 2014. 
+- **Departements** : Couche des départements sénégalais. Source : https://gadm.org/, 2014   
+- **Localites** : Couche de points des localités sénégalaises. Source : Base de données géospatiales prioritaires du Sénégal. https://www.geosenegal.gouv.sn/, 2014. 
 - **USSEIN** : Localisation de l'Université du Sine Saloum El-hâdj ibrahima NIASS. Source : Google Maps, 2014. 
 - **Routes** : Couche du réseau routier sénégalais. Source : Base de données géospatiales prioritaires du Sénégal. https://www.geosenegal.gouv.sn/, 2014. 
 
@@ -46,7 +46,9 @@ Les fichier de données sont mis à disposition dans le répertoire **data**, qu
 
 </br>
 
-#### A. Import des données
+#### A. Import et reprojection des données
+
+##### A.1 Import des données
 
 Importez l'ensemble des couches géographiques contenues dans le fichier GeoPackage **GeoSenegal.gpkg**.
 
@@ -56,7 +58,17 @@ Importez l'ensemble des couches géographiques contenues dans le fichier GeoPack
 
 </br>
 
-#### B. Géocadage d'une adresse (point de départ)
+##### A.2 Reprojection de données géographiques
+
+Reprojetez l'ensemble des couches géographiques en *WGS 84 / Pseudo-Mercator* (3857)
+
+    ... <- st_transform(...,  "EPSG:3857")
+    ... <- st_transform(...,  "EPSG:3857")
+
+
+</br>
+
+#### B. Géocadage d'une adresse 
 
 ##### B.1 Récupération de coordonnées géographiques
 
@@ -70,18 +82,16 @@ Récupérer les coordonnées de l'adresse suivante : "Grande Mosquée de Touba, 
 
 </br>
 
-##### B.2 Construisez un objet sf (couche géographique) à partir des coordonnées (WGS84) récupérées.
+##### B.2 Construisez un objet sf (couche géographique vectorielle dans R) à partir des coordonnées (WGS84) récupérées.
 
 
     ... <- st_as_sf(..., coords = c("long", "lat"), crs = 4326)
     
- 
  </br>
    
-##### B.3 Transformez cette nouvelle couche géographique en projection WGS 84 / UTM zone 28N (32628)
+##### B.3 Transformez cette nouvelle couche géographique en projection *WGS 84 / Pseudo-Mercator* (3857).
 
-    
-    ... <- st_transform(... , crs = "EPSG:32628")
+    ... <- st_transform(... , crs = "EPSG:3857")
 
 
 </br>
@@ -99,7 +109,7 @@ Le point est-il correctement localisé ?
 </br>
 
 
-#### C. Calcul de centroïdes (point de d'arrivée)
+#### C. Calcul des centroïdes (point de d'arrivée)
 
 Créez une couche de point en calculant les centroïdes de départements sénégalais.
 
@@ -122,7 +132,7 @@ Utilisez un buffer de plusieurs kilomètre autour des limites du sénégal pour 
 </br>
 
 
-#### E. Affichage des données construites et récupérées
+#### E. Affichage des données géographiques construites et récupérées
 
 
 Affichez les couches géographiques suivantes dans la fenêtre graphique :
@@ -143,7 +153,7 @@ Affichez les couches géographiques suivantes dans la fenêtre graphique :
 
 
 
-#### F. Calculez des matrices de distances
+#### F. Calculez une matrice de distances
 
 
 ##### F.1 Distance euclidienne
@@ -172,9 +182,9 @@ En utilisant la fonction `osrmTable` du package `osrm`, calculez une matrice de 
 
 </br> 
                               
-##### F.3 Ajouter les différentes distances calculées à la couche géographiques des centroïdes des départements
+##### F.3 Ajoutez les différentes distances calculées à la couche géographiques des centroïdes des départements
  
- Profitez-en pour convertir convertir les unités de mesur en kilomètre et en heure.
+Profitez-en pour convertir convertir les unités de mesure en kilomètre et en heure.
  
  
       # Distance Euclidienne - mètres -> kilomètres
@@ -193,7 +203,7 @@ En utilisant la fonction `osrmTable` du package `osrm`, calculez une matrice de 
 
 ##### G.1 Calcul d'indicateurs globaux d'accessibilité
 
-Calculez la médianne et la moyenne pour les trois types de distance récupérés (euclidienne, par la route, temps par la route).
+Calculez la médianne et la moyenne pour les trois types de distances récupérés (euclidienne, par la route, temps par la route).
 
     mean(...$...)
     max(...$...)
@@ -208,7 +218,7 @@ Calculez les indices de performance suivants :
 - **Indice de sinuosité** = distance km par la route / distance euclidienne
 - **Indice global de performance** = **Indice de vitesse sur route** / **Indice de sinuosité**.
 
-Arrondissez les valeurs calculée avec la fonction `round()`
+Arrondissez les valeurs calculées avec la fonction `round()`
 
     # Indice de sinuosité 
     dep_pt$... <- round(...$... / ...$..., 2)
@@ -251,7 +261,7 @@ Quel centroïde département présente l'indice global de performance le plus el
 
 ##### H.1 Récupération de l'ititnéraire "Mosquee Touba - Dakar"
 
-En utilisant la fonction `osrmRoute()` du package `osrm`, calculez l'itinéraire routier entre la grande Mosquee de Touba et le centroîde de département présentant le meilleur indice global de performance. Stocker cet itinéraire (ligne) dans un nouvel objet.
+En utilisant la fonction `osrmRoute()` du package `osrm`, calculez l'itinéraire routier entre la grande Mosquee de Touba et le centroîde de département présentant le meilleur indice global de performance. Stockez cet itinéraire (ligne) dans un nouvel objet.
 
     ... <- osrmRoute(src = ..., dst = ...)
 
@@ -260,7 +270,7 @@ En utilisant la fonction `osrmRoute()` du package `osrm`, calculez l'itinéraire
 
 ##### H.2 Cartographie de l'itinéraire récupéré
 
-Cartographiez l'itinéraire présenant le meilleur indice de performance ("Mosquee Touba - Dakar") sur une carte.
+Cartographiez l'itinéraire présentant le meilleur indice de performance ("Mosquee Touba - Dakar") sur une carte.
 
 
     mf_raster(...)
